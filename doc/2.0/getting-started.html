@@ -70,7 +70,38 @@
       <!-- ================================================================= -->
       <h2>Getting Started</h2>
       <br/>
-
+      <h3>Introduction</h3>
+      <p>
+      In this getting started tutorial, we will introduce you with the Cube platform with a simple,
+      but a concret scenario. We will cover the main concepts and follow a step by step tasks to get
+      the Cube platform self-managing a distributed component-based software system wile ensuring
+      the resilience of the managed system.
+      </p>
+      <h3>Managed System</h3>
+      <p>
+        The managed system is examplified in the following picture:
+      </p>
+      <p style="text-align:center;">
+      <img src="getting-started-1.png" class="img-responsive img-thumbnail" style="width:400px;" alt="Responsive image"/>
+      </p>
+      <p>
+        The system is composed of a set of devices (Dev-*), a set of processing machines (PD-*) and a database.
+        A special component "A" is deployed on the different devices to instantly collect particular type of
+        data and send it to the processing machine. At this level, the data is filtred, aggregated and saved on
+        a database.
+      </p>
+      <h3>Administration Objectives</h3>
+      <p>
+        To ensure the survavibility of the system, we have more that one processing machine, but only one
+        in activity at a given time.
+        <ol>
+          <li>At design-time, developers have not an idea about the running processing machines. Hence, designing a static architecture
+          is not a possible. The component "A" should be connected to a another component "B" localted on
+          any active processing machine (but only one at a time). The connection between "A" and "B" components should be done at runtime.</li>
+          <li>When a processing machine fails, another PC of the cluster should replace it automatically. A new processing components should
+          be created in this new machine, and all "A" components in the devices should be redirected to this new machine.</li>
+        </ol>
+      </p>
       <br/>- <b>Objectives</b>
       <br/>  - Using Cube to self-manage distributed component-based system
       <br/>  > self-creating components
@@ -78,9 +109,14 @@
       <br/>  > self-healing
       <br/>  - Explain the main concepts
       <br/>
-      <p style="text-align:center;">
-      <img src="getting-started-1.png" class="img-responsive img-thumbnail" style="width:400px;" alt="Responsive image"/>
-      </p>
+
+      <br/> <b>Managed Elements?</b>
+      <br/>  - Nodes (PC, Devices)
+      <br/>  - Scopes (Cluster)
+      <br/>  - Components (A, B, C, D) [explain that A for instance can represent different component implementations, but has the same role]
+      <br/> <b>Objectives</b>
+      <br/>  - cluster membership
+      <br/>  - creating/connecting component
       <br/>- <b>Steps</b>
       <br/>  - Write objectives
       <br/>  - Download Cube platform
