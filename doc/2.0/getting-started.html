@@ -85,43 +85,139 @@
       <img src="getting-started-1.png" class="img-responsive img-thumbnail" style="width:400px;" alt="Responsive image"/>
       </p>
       <p>
-        The system is composed of a set of devices (Dev-*), a set of processing machines (PD-*) and a database.
+        The system is composed of a set of devices (Dev-*), a set of processing machines (PC-*) and a database (DB).
         A special component "A" is deployed on the different devices to instantly collect particular type of
-        data and send it to the processing machine. At this level, the data is filtred, aggregated and saved on
-        a database.
+        data and send it to the processing machine which filter, aggregate and save the collected data on
+        the database.
       </p>
       <h3>Administration Objectives</h3>
       <p>
-        To ensure the survavibility of the system, we have more that one processing machine, but only one
-        in activity at a given time.
+        To ensure the survavibility of the system, we have more than one processing machine, but only active at a given time.
         <ol>
-          <li>At design-time, developers have not an idea about the running processing machines. Hence, designing a static architecture
-          is not a possible. The component "A" should be connected to a another component "B" localted on
-          any active processing machine (but only one at a time). The connection between "A" and "B" components should be done at runtime.</li>
-          <li>When a processing machine fails, another PC of the cluster should replace it automatically. A new processing components should
-          be created in this new machine, and all "A" components in the devices should be redirected to this new machine.</li>
+          <li>At design-time, developers have not an idea about the running processing machines, neither the concrete implementation of the "A" component to instantiate. Hence, designing a static architecture
+          is not a possible. The instance of the component "A" should identified
+          at runtime depending on the type of the hosting machine, and should be
+          connected to a another component "B" localted on any active processing
+           machine (but only one at a time).
+          </li>
+          <li>When a processing machine fails, another PC of the cluster should
+            replace it automatically. A new processing components (B, C, and D)
+            should be created at this new machine, and all "A" components in the
+            devices should be redirected to this new machine.</li>
         </ol>
       </p>
-      <br/>- <b>Objectives</b>
-      <br/>  - Using Cube to self-manage distributed component-based system
-      <br/>  > self-creating components
-      <br/>  > self-connecting components
-      <br/>  > self-healing
-      <br/>  - Explain the main concepts
-      <br/>
+      <h3>Solution</h3>
+      <p>
+        We start by identifying the elements of the system to be managed. In this
+        cas, we have mainly three concepts:
+        <ul>
+          <li>Nodes (PC, Devices)</li>
+          <li>Components (A, B, C, D)</li>
+          <li>and, Scope (Cluster of PCs)</li>
+        </ul>
+        Using this concepts (already handled by the core Cube framework - no need
+        for extra models), we write the "Archetype" for this problem as depicted
+        on the following picture.
+      </p>
+      <p>
+        <img width="100%" src="getting-started-2.png"/>
+      </p>
+      <p>
+        In an archetype graph, we distinguishe between the colored rectangles and
+        grey rectangles. Colored rectangles representes descriptions of managed elements,
+        while the grey rectangles represents concrete values.
+      </p>
+      <p>
+        The left part of the graph specify a description of any component that has
+        a type "A" and which is located on a node of type "Device". If any concret
+        component at runtime fulfil this description, the goal "connected" should
+        be applied. In this case, the target component on which we will connect
+        the "A" component's instance is of type "B" and is located on a node of
+        type "PC".
+      </p>
+      <p>
+        Any Component of type "B" should be conntected with another component of
+        type "C". This last one should also be connected with another component
+        of type "D".
+      </p>
+      <p>
+        Finally, all the nodes of type "PC" should be regrouped within the same scope
+        "Cluster". All the scopes have the same "Master" instance that should be
+        identified statically before starting the system.
+      </p>
+      <h3>Deployment and running</h3>
+      <p>
+        On each execution node (Devices, and PCs), we should install a Cube Autonomic
+        Manager. Each Autonomic Manager has a configuration file which provides
+        a startup configuration information that fit the local running machine.
+      </p>
+      <p>
+        The following XML file is the configuration file of one of the Cube Autonomic
+        Managers controlling a device machine.
+      </p>
+      <p>
+        <div class="source"><pre class="prettyprint linenums">&lt;cube&gt;
+  &lt;autonomic-manager&gt;
+    &lt;host value=&quot;localhost&quot;/&gt;
+    &lt;port value=&quot;3840&quot;/&gt;
+    &lt;archetypeUrl value=&quot;file:../demo.arch&quot;/&gt;
 
-      <br/> <b>Managed Elements?</b>
-      <br/>  - Nodes (PC, Devices)
-      <br/>  - Scopes (Cluster)
-      <br/>  - Components (A, B, C, D) [explain that A for instance can represent different component implementations, but has the same role]
-      <br/> <b>Objectives</b>
-      <br/>  - cluster membership
-      <br/>  - creating/connecting component
-      <br/>- <b>Steps</b>
-      <br/>  - Write objectives
-      <br/>  - Download Cube platform
-      <br/>  - Explain configuration file
-      <br/>  - Test/simulate changes
+    &lt;extensions&gt;
+      &lt;extension id=&quot;cube.core&quot;/&gt;
+      &lt;extension id=&quot;cube.techno1&quot;/&gt;
+      &lt;extension id=&quot;cube.rm.monitoring&quot;/&gt;
+    &lt;/extensions&gt;
+  &lt;/autonomic-manager&gt;
+&lt;/cube&gt;</pre></div>
+      </p>
+      <p>
+        Each Autonomic Manager has a basic information like its host, port, and
+        a reference to the Archetype specification to be used. There is also
+        a list of extensions to be used by the Autonomic Manager for specific
+        purposes. Here, we have three extensions:
+        <ol>
+          <li><b>cube.core</b>: provides the core model concepts (Component, Node,
+            Scope, and Master) as well as their corresponding constraints and
+            constraint resolvers (connected, onNode, inScope, etc).</li>
+          <li><b>cube.techno1</b>: provides a monitoring and actuating interface
+          with the concret "A"'s component instance technology on the controlled
+          machine. For each other machine, we should use its corresponding extension.</li>
+          <li><b>cube.rm.monitoring</b>: provides a graphical real-time view of the
+            "Runtime Model" of the Autonomic Manager.</li>
+        </ol>
+      </p>
+      <h3>Tests</h3>
+      <p>
+        <ul>
+          <li>Download the <a href="#">demo package here</a></li>
+          <li>This package contain the following content: <br/>
+<pre>
+  + cube-demo
+    - demo.arch
+    + master
+    + dev1
+    + dev2
+    + dev3
+    + pc1
+    + pc2
+</pre>
+          </li>
+          <li>The unzipped file contain one directory called "cube-demo". This
+            directory containts one file "demo.arch" which is the archetype file
+          for this example, and a set of directories containing each a Cube
+          Autonomic Manager.</li>
+          <li>Start the master Autonomic Manager</li>
+          <li>Start the other Autonomic Managers with any order from different
+            terminals</li>
+          <li>The opened windows are the graphical Runtime Model monitoring
+          exetension specified on each Autonomic Manager. You will see that the
+          application is correctly created</li>
+          <li>try to stop the pc containing the B, C, and D components. You notice
+          that Cube creates the part of the application in another PC to maintain
+          the application's architecture correcte (as specified in the archetype)</li>
+        </ul>
+      </p>
+      
 
 
       <!-- ================================================================= -->
